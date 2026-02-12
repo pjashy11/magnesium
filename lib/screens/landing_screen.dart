@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -6,7 +5,8 @@ import '../providers/shopify_provider.dart';
 import 'storefront_screen.dart';
 import 'cart_screen.dart';
 
-const String brandlogo = 'https://firebasestorage.googleapis.com/v0/b/magnesium-athletes.firebasestorage.app/o/logo.svg?alt=media&token=53463da7-1650-4339-a2c1-f8634053928f';
+/// BRAND ASSETS
+const String brandLogoUrl = 'https://firebasestorage.googleapis.com/v0/b/magnesium-athletes.firebasestorage.app/o/logo.svg?alt=media&token=53463da7-1650-4339-a2c1-f8634053928f';
 
 class BrandLogo extends StatelessWidget {
   final double height;
@@ -18,11 +18,10 @@ class BrandLogo extends StatelessWidget {
     return SizedBox(
       height: height,
       child: SvgPicture.network(
-        brandlogo,
+        brandLogoUrl,
         height: height,
         fit: BoxFit.contain,
         placeholderBuilder: (context) => _buildPlaceholder(),
-        // Fallback in case of network or rendering error
         errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
       ),
     );
@@ -68,6 +67,9 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _missionKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +80,14 @@ class _LandingScreenState extends State<LandingScreen> {
     });
   }
 
+  void _scrollToMission() {
+    Scrollable.ensureVisible(
+      _missionKey.currentContext!,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final shopify = context.watch<ShopifyProvider>();
@@ -85,6 +95,7 @@ class _LandingScreenState extends State<LandingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: CustomScrollView(
+        controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         slivers: [
           _buildSliverAppBar(),
@@ -93,11 +104,11 @@ class _LandingScreenState extends State<LandingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHero(),
-                _buildValuePillars(),
+                _buildMissionSection(key: _missionKey),
+                _buildAboutSection(),
                 if (shopify.collections.isNotEmpty)
                   ...shopify.collections.map((col) => _buildCollectionCarousel(col)),
                 _buildMolecularBreakdown(),
-                _buildOurStory(),
                 _buildFooterCTA(),
               ],
             ),
@@ -172,71 +183,102 @@ class _LandingScreenState extends State<LandingScreen> {
             style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.6), fontSize: 16, height: 1.5, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 40),
-          const SizedBox.shrink(),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 64,
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StorefrontScreen())),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 64,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StorefrontScreen())),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: const Text('SHOP CATALOG',
+                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 12)),
+                  ),
+                ),
               ),
-              child: const Text('SHOP THE CATALOG',
-                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 14)),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 1,
+                child: SizedBox(
+                  height: 64,
+                  child: OutlinedButton(
+                    onPressed: _scrollToMission,
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF02B3A9), width: 2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Text('OUR MISSION',
+                        style: TextStyle(color: Color(0xFF02B3A9), fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 10)),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildValuePillars() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          _buildPillarCard('01', 'RECHARGE', 'Transdermal absorption bypasses the gap for instant muscle fuel.', Icons.bolt),
-          const SizedBox(height: 12),
-          _buildPillarCard('02', 'DETOX', 'Flush lactic acid and metabolic waste through cellular osmotic pressure.', Icons.waves),
-          const SizedBox(height: 12),
-          _buildPillarCard('03', 'DEFEND', 'Natural antimicrobial oils protect against gym-acquired bacteria.', Icons.shield_outlined),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPillarCard(String num, String title, String desc, IconData icon) {
+  Widget _buildMissionSection({Key? key}) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      key: key,
+      width: double.infinity,
+      padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: const Color(0xFF02B3A9).withValues(alpha: 0.05),
+        border: const Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(6)),
-            child: Text(num, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
+          const Text('OUR MISSION',
+              style: TextStyle(color: Color(0xFF02B3A9), fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 12)),
+          const SizedBox(height: 16),
+          const Text('OPTIMIZE.\nRECOVER.\nDOMINATE.',
+              style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, height: 0.9, color: Color(0xFF0F172A))),
+          const SizedBox(height: 20),
+          Text(
+            'At Magnesium Athletes, we believe every competitor deserves elite care. Our mission is to enhance performance, facilitate rapid recovery, and prioritize holistic well-being through scientifically formulated transdermal fuel.',
+            style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.6), fontSize: 16, height: 1.5),
           ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1)),
-                const SizedBox(height: 4),
-                Text(desc, style: TextStyle(color: Colors.black.withValues(alpha: 0.5), fontSize: 12, height: 1.4)),
-              ],
-            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return Padding(
+      padding: const EdgeInsets.all(30),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(width: 40, height: 2, color: const Color(0xFFF19842)),
+              const SizedBox(width: 12),
+              const Text('THE ORIGIN STORY',
+                  style: TextStyle(color: Color(0xFFF19842), fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 12)),
+            ],
           ),
-          Icon(icon, color: const Color(0xFF02B3A9), size: 20),
+          const SizedBox(height: 24),
+          const Text('BORN IN THE TRENCHES',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Color(0xFF0F172A))),
+          const SizedBox(height: 16),
+          Text(
+            'Born from the shared passion of a dedicated Cross-Fit/Boxing enthusiast and a natural skin care expert, Magnesium Athletes was created to revolutionize recovery. We set out to banish gritty skin, alleviate muscle aches, and quell inflammation—all while keeping athletes remarkably clean and fresh.',
+            style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 16, height: 1.6, fontWeight: FontWeight.w400),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Our journey began with extensive research into the healing powers of natural ingredients. We focus on ridding the skin of viruses and bacteria found in sweat and gym environments, ensuring that your recovery doesn\'t just feel good—it protects your body.',
+            style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 16, height: 1.6, fontWeight: FontWeight.w400),
+          ),
         ],
       ),
     );
@@ -335,69 +377,87 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildMolecularBreakdown() {
     return Container(
-      padding: const EdgeInsets.all(30),
       color: const Color(0xFF0F172A),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('RECOVERY LAB',
-              style: TextStyle(color: Color(0xFF02B3A9), fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 2)),
-          const SizedBox(height: 16),
-          const Text('MOLECULAR\nBREAKDOWN',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, height: 0.9, color: Colors.white)),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(30, 60, 30, 8),
+            child: Text('MOLECULAR BREAKDOWN',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Colors.white)),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Text('HOW OUR ACTIVE RECOVERY FORMULA WORKS',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.5)),
+          ),
           const SizedBox(height: 32),
-          _buildDarkIngredientTile('MAGNESIUM SALTS', 'Sulfate & Chloride variants for rapid cell detox.', Icons.bolt),
-          _buildDarkIngredientTile('MAGNESIUM LOTION', 'Transdermal absorption for direct muscle application.', Icons.spa_outlined),
-          _buildDarkIngredientTile('ARNICA MONTANA', 'High-potency anti-inflammatory for muscle strain.', Icons.health_and_safety),
-          _buildDarkIngredientTile('MSM BIO-SULFUR', 'Critical joint support and collagen synthesis.', Icons.layers),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 1,
+            childAspectRatio: 2.5,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            mainAxisSpacing: 16,
+            children: [
+              _buildIngredientCard(
+                'MAGNESIUM SALTS',
+                'Sulfate & Chloride variants. Relaxes muscles, reduces cramps, and flushes toxins at the cellular level.',
+                Icons.bolt,
+                const Color(0xFF02B3A9),
+              ),
+              _buildIngredientCard(
+                'MSM (BIO-SULFUR)',
+                'Crucial for collagen and keratin. Supports cartilage health, reduces joint pain, and improves skin elasticity.',
+                Icons.layers_outlined,
+                const Color(0xFFF19842),
+              ),
+              _buildIngredientCard(
+                'ARNICA MONTANA',
+                'Speeds up healing of bruises and strains. High-potency anti-inflammatory properties for rapid pain relief.',
+                Icons.health_and_safety_outlined,
+                const Color(0xFF02B3A9),
+              ),
+              _buildIngredientCard(
+                'TEA TREE & ESSENTIAL OILS',
+                'Antifungal and antibacterial shield. Prevents gym-acquired infections and keeps skin hydrated.',
+                Icons.eco_outlined,
+                const Color(0xFFF19842),
+              ),
+            ],
+          ),
+          const SizedBox(height: 60),
         ],
       ),
     );
   }
 
-  Widget _buildDarkIngredientTile(String title, String desc, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+  Widget _buildIngredientCard(String title, String desc, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
-            child: Icon(icon, color: const Color(0xFF02B3A9), size: 24),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
+            child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14, fontStyle: FontStyle.italic)),
-                const SizedBox(height: 4),
-                Text(desc, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, fontStyle: FontStyle.italic, color: Colors.white)),
+                const SizedBox(height: 8),
+                Text(desc, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13, height: 1.4)),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOurStory() {
-    return Padding(
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('BORN IN THE TRENCHES',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Color(0xFF0F172A))),
-          const SizedBox(height: 20),
-          Text(
-            'Magnesium Athletes was created by a dedicated CrossFit/Boxing enthusiast and a skin care expert to solve a critical gap in recovery: purity and bioavailability.',
-            style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 16, height: 1.6),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'We focus on ridding the skin of viruses and bacteria found in intense gym environments while fueling the body with transdermal minerals.',
-            style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 16, height: 1.6),
           ),
         ],
       ),
@@ -430,7 +490,6 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ),
           const SizedBox(height: 40),
-          // Logo removed as requested to avoid blending with orange background
         ],
       ),
     );
