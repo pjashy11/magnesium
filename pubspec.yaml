@@ -1,0 +1,31 @@
+
+name: magnesium_athletes
+description: "Magnesium Athletes Store"
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  graphql_flutter: ^5.1.0
+  provider: ^6.1.1
+  cupertino_icons: ^1.0.8
+  intl: ^0.19.0
+  url_launcher: ^6.2.1
+  webview_flutter: ^4.4.2
+  flutter_svg: ^2.0.10+1
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets: []
