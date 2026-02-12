@@ -3,7 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 class ShopifyService {
   static final HttpLink httpLink = HttpLink(
-    'https://f5ab0c-4.myshopify.com/api/2023-04/graphql.json',
+    'https://magnesiumathletes.com/api/2023-04/graphql.json',
     defaultHeaders: {
       'X-Shopify-Storefront-Access-Token': 'e8bdd981f138c518c73e28deb785417e',
     },
