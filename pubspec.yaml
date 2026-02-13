@@ -19,13 +19,33 @@ dependencies:
   url_launcher: ^6.2.1
   webview_flutter: ^4.4.2
   flutter_svg: ^2.0.10+1
-
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: "^0.13.1"
+  flutter_native_splash: "^2.3.1"
+
+# CONFIGURATION FOR NATIVE ICON GENERATION
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "lib/assets/icon/app-icon.png"
+  adaptive_icon_background: "#0F172A"
+  adaptive_icon_foreground: "lib/assets/icon/app-icon.png"
+
+# CONFIGURATION FOR NATIVE OS SPLASH
+flutter_native_splash:
+  color: "#0F172A"
+  fullscreen: true
+  android_12:
+    color: "#0F172A"
+    icon_background_color: "#0F172A"
 
 flutter:
   uses-material-design: true
-  assets: []
+  assets:
+    - lib/assets/icon/

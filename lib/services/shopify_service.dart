@@ -3,7 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 class ShopifyService {
   static final HttpLink httpLink = HttpLink(
-    'https://magnesiumathletes.com/api/2023-04/graphql.json',
+    'https://f5ab0c-4.myshopify.com/api/2025-10/graphql.json',
     defaultHeaders: {
       'X-Shopify-Storefront-Access-Token': 'e8bdd981f138c518c73e28deb785417e',
     },
@@ -73,6 +73,21 @@ class ShopifyService {
   static const String cartCreateMutation = r"""
     mutation cartCreate($input: CartInput!) {
       cartCreate(input: $input) {
+        cart {
+          id
+          checkoutUrl
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  """;
+
+  static const String cartBuyerIdentityUpdateMutation = r"""
+    mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+      cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
         cart {
           id
           checkoutUrl

@@ -1,11 +1,19 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/shopify_provider.dart';
-import 'screens/landing_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
+  // Ensure the status bar matches our premium theme immediately
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+  ));
+
   runApp(
     MultiProvider(
       providers: [
@@ -25,6 +33,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Magnesium Athletes',
+      // The 'color' property sets the color used for the app in the OS switcher
+      // and the default background before the first frame is drawn.
+      color: const Color(0xFF0F172A),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFF19842),
@@ -32,7 +43,9 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        // Syncing scaffold background to navy initially prevents the "white blink"
+        // while the SplashScreen widget mounts.
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFF8FAFC),
           elevation: 0,
@@ -45,7 +58,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const LandingScreen(),
+      home: const SplashScreen(),
     );
   }
 }

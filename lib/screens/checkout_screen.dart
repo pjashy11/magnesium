@@ -4,11 +4,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/cart_provider.dart';
 import '../providers/shopify_provider.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  final String? forcedUrl;
+  const CheckoutScreen({super.key, this.forcedUrl});
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
@@ -27,8 +29,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _initializeCheckoutSession() async {
     try {
-      final cartItems = context.read<CartProvider>().items;
-      final webUrl = await context.read<ShopifyProvider>().createCheckout(cartItems);
+      String? webUrl = widget.forcedUrl;
+
+      if (webUrl == null) {
+        final cartItems = context.read<CartProvider>().items;
+        webUrl = await context.read<ShopifyProvider>().createCheckout(cartItems);
+      }
 
       if (webUrl != null) {
         final controller = WebViewController()
@@ -41,8 +47,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               },
               onPageFinished: (String url) {
                 if (mounted) setState(() => _isSyncing = false);
-                // Shopify Checkout Kit Detection:
-                // Intercept the 'thank you' page to trigger native completion logic
+
+                // Check if we've reached the thank you page to clear the cart
                 if (url.contains('thank_you') || url.contains('orders/')) {
                   _handleCheckoutSuccess();
                 }
@@ -51,6 +57,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 debugPrint('Secure Tunnel Error: ${error.description}');
               },
               onNavigationRequest: (NavigationRequest request) {
+                final String url = request.url;
+
+                // INTERCEPT NON-WEB SCHEMES (mailto, tel, etc)
+                if (url.startsWith('mailto:') || url.startsWith('tel:')) {
+                  _handleExternalScheme(url);
+                  return NavigationDecision.prevent;
+                }
+
                 return NavigationDecision.navigate;
               },
             ),
@@ -73,6 +87,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _isSyncing = false;
         _errorMessage = "BIO-SYNC ERROR: $e";
       });
+    }
+  }
+
+  Future<void> _handleExternalScheme(String url) async {
+    final Uri uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('Could not launch external scheme: $url');
+      }
+    } catch (e) {
+      debugPrint('Error launching external scheme: $e');
     }
   }
 
@@ -110,7 +137,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           if (_controller != null)
             WebViewWidget(
               controller: _controller!,
-              // CRITICAL: Explicitly handle vertical drags within the WebView
               gestureRecognizers: {
                 Factory<VerticalDragGestureRecognizer>(
                       () => VerticalDragGestureRecognizer(),
@@ -143,7 +169,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           const SizedBox(height: 32),
           const Text(
-            'PREPARING PERFORMANCE PORTAL',
+            'CONNECTING TO SECURE GATEWAY',
             style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 12,
