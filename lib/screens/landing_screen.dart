@@ -370,8 +370,8 @@ class _LandingScreenState extends State<LandingScreen> {
               children: [
                 _buildIngredientCard(
                     context,
-                    'MAGNESIUM',
-                    'Deep Recovery',
+                    'MAGNESIUM SALTS',
+                    'Deep-Absorbing Recovery',
                     Icons.bolt,
                     const Color(0xFF02B3A9),
                     []
@@ -782,4 +782,3 @@ class MissionPopup extends StatelessWidget {
     );
   }
 }
-
