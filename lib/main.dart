@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -16,17 +15,19 @@ void main() async {
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
     systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.light,
   ));
 
   try {
     if (Platform.isIOS || Platform.isAndroid) {
       if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp().timeout(const Duration(seconds: 8));
+        await Firebase.initializeApp().timeout(const Duration(seconds: 5));
         debugPrint('BIO-SYNC: Firebase link established.');
       }
     }
   } catch (e) {
-     debugPrint('BIO-SYNC WARNING: Native config not found. Core operational, cloud features deferred. Error: $e');
+    // Graceful fallback if native configuration isn't present yet
+    debugPrint('BIO-SYNC WARNING: Native configuration deferred. Core operational. Note: $e');
   }
 
   runApp(
@@ -61,7 +62,6 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
-          iconTheme: IconThemeData(color: Color(0xFF0F172A)),
           titleTextStyle: TextStyle(
             fontWeight: FontWeight.w900,
             letterSpacing: 1.2,
