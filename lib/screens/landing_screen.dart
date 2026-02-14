@@ -853,20 +853,96 @@ class MissionPopup extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('MISSION STATEMENT',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28, fontStyle: FontStyle.italic, color: Color(0xFF0F172A), letterSpacing: -0.5)),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'At Magnesium Athletes, our mission is to enhance your performance and recovery through the power of science.',
-                    style: TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF475569)),
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, fontStyle: FontStyle.italic, color: Color(0xFF0F172A), letterSpacing: -1.0)),
+                  const SizedBox(height: 24),
+
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF02B3A9).withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: const Border(left: BorderSide(color: Color(0xFF02B3A9), width: 4)),
+                    ),
+                    child: const Text(
+                      'At Magnesium Athletes, our mission is to enhance your performance and recovery through the power of science.',
+                      style: TextStyle(fontSize: 18, height: 1.5, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Color(0xFF0F172A)),
+                    ),
                   ),
+
+                  const SizedBox(height: 32),
+                  _missionParagraph(
+                    'Born from the shared passion of a dedicated Cross-Fit/Boxing enthusiast and a natural skin care expert, Magnesium Athletes was created to revolutionize recovery. We set out to banish gritty skin, alleviate muscle aches, and quell inflammation—all while keeping athletes remarkably clean and fresh.',
+                  ),
+                  const SizedBox(height: 20),
+                  _missionParagraph(
+                    'Our journey began with extensive research into the healing powers of natural ingredients. We focus on ridding the skin of viruses and bacteria found in sweat and gym environments, ensuring that your recovery doesn\'t just feel good—it protects your body.',
+                  ),
+                  const SizedBox(height: 20),
+                  _missionParagraph(
+                    'We believe that every athlete deserves recovery tools that work as hard as they do. By leveraging high-absorption magnesium salts and botanical extracts, we provide a bio-available reset that prepares you for the next round, the next set, and the next challenge.',
+                  ),
+
                   const SizedBox(height: 40),
-                  const Text('-Magnesium Athletes.',
+                  const Text('PILLARS OF RECOVERY',
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 2, color: Color(0xFF64748B))),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    children: [
+                      _pillarItem('PURITY', 'No synthetic fillers or harsh chemicals.', Icons.eco_outlined),
+                      const SizedBox(width: 12),
+                      _pillarItem('PERFORMANCE', 'Scientifically backed ion absorption.', Icons.bolt_outlined),
+                      const SizedBox(width: 12),
+                      _pillarItem('PROTECTION', 'Active defense against gym bacteria.', Icons.shield_outlined),
+                    ],
+                  ),
+
+                  const SizedBox(height: 48),
+                  const Text('— Magnesium Athletes.',
                       style: TextStyle(fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, fontSize: 18, color: Color(0xFF0F172A))),
+                  const SizedBox(height: 4),
+                  const Text('OPERATIONAL STRENGTH • ENGINEERING PERFECTED',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 9, letterSpacing: 2, color: Color(0xFF94A3B8))),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _missionParagraph(String text) {
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 15, height: 1.6, color: Color(0xFF475569), fontWeight: FontWeight.w400),
+    );
+  }
+
+  Widget _pillarItem(String title, String desc, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: const Color(0xFF02B3A9), size: 20),
+            const SizedBox(height: 8),
+            Text(title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 9, letterSpacing: 1.0, color: Color(0xFF0F172A)),
+            ),
+            const SizedBox(height: 4),
+            Text(desc,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 8, color: Color(0xFF94A3B8), height: 1.2),
+            ),
+          ],
+        ),
       ),
     );
   }
