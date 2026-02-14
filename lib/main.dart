@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'providers/cart_provider.dart';
 import 'providers/shopify_provider.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
-  // Ensure the status bar matches our premium theme immediately
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // Initialize Firebase for iOS/Android
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase Initialization Warning: $e');
+    // Continue loading the app even if Firebase fails (offline mode)
+  }
+
+  // Force the UI to immersive mode immediately to match the native splash
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
+    systemNavigationBarColor: Colors.transparent,
   ));
 
   runApp(
@@ -37,27 +44,25 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Magnesium Athletes',
-      // The 'color' property sets the color used for the app in the OS switcher
-      // and the default background before the first frame is drawn.
       color: const Color(0xFF0F172A),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFF19842),
           secondary: const Color(0xFF02B3A9),
-          brightness: Brightness.light,
+          brightness: Brightness.dark,
         ),
         useMaterial3: true,
-        // Syncing scaffold background to navy initially prevents the "white blink"
-        // while the SplashScreen widget mounts.
         scaffoldBackgroundColor: const Color(0xFF0F172A),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFF8FAFC),
+          backgroundColor: Colors.white,
           elevation: 0,
+          centerTitle: true,
           iconTheme: IconThemeData(color: Color(0xFF0F172A)),
           titleTextStyle: TextStyle(
             fontWeight: FontWeight.w900,
             letterSpacing: 1.2,
-            fontSize: 18,
+            fontSize: 16,
+            fontStyle: FontStyle.italic,
             color: Color(0xFF0F172A),
           ),
         ),
