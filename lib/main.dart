@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -5,25 +6,28 @@ import 'package:firebase_core/firebase_core.dart';
 import 'providers/cart_provider.dart';
 import 'providers/shopify_provider.dart';
 import 'screens/splash_screen.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase for iOS/Android
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase Initialization Warning: $e');
-    // Continue loading the app even if Firebase fails (offline mode)
-  }
-
-  // Force the UI to immersive mode immediately to match the native splash
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
     systemNavigationBarColor: Colors.transparent,
   ));
+
+  try {
+    if (Platform.isIOS || Platform.isAndroid) {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp().timeout(const Duration(seconds: 8));
+        debugPrint('BIO-SYNC: Firebase link established.');
+      }
+    }
+  } catch (e) {
+     debugPrint('BIO-SYNC WARNING: Native config not found. Core operational, cloud features deferred. Error: $e');
+  }
 
   runApp(
     MultiProvider(
