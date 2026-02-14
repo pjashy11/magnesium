@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'providers/cart_provider.dart';
 import 'providers/shopify_provider.dart';
 import 'screens/splash_screen.dart';
@@ -18,16 +19,12 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
-  try {
-    if (Platform.isIOS || Platform.isAndroid) {
-      if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp().timeout(const Duration(seconds: 5));
-        debugPrint('BIO-SYNC: Firebase link established.');
-      }
+  if (Platform.isIOS || Platform.isAndroid) {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
     }
-  } catch (e) {
-    // Graceful fallback if native configuration isn't present yet
-    debugPrint('BIO-SYNC WARNING: Native configuration deferred. Core operational. Note: $e');
   }
 
   runApp(
