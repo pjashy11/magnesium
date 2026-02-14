@@ -59,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAb2DeVL82DOPqrxZ7PEczdZDafb_m1iKY',
-    appId: '1:2863140150:ios:70665a3d045ae4cde2f797',
+    appId: '1:2863140150:ios:913cb5e6bc84b6dbe2f797',
     messagingSenderId: '2863140150',
     projectId: 'magnesium-athletes',
     storageBucket: 'magnesium-athletes.firebasestorage.app',
-    iosBundleId: 'com.magnesiumathletes.magnesiumAthletes',
+    iosBundleId: 'com.magnesiumathletes.ios',
   );
 }
