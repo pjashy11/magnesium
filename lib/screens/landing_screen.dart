@@ -438,7 +438,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildMolecularBreakdown() {
     final ingredients = [
-      _Ingredient('MAGNESIUM SALTS', 'Deep-Absorbing Recovery', 'Mg', '01', const Color(0xFF02B3A9), [
+      _Ingredient('MAGNESIUM SALTS', 'Deep-Absorbing', 'Mg', '01', const Color(0xFF02B3A9), [
         {'label': 'Muscle Relaxation', 'content': 'Magnesium is a natural muscle relaxant. When absorbed through the skin, it helps to ease muscle tension and reduce cramps.'},
         {'label': 'Inflammation Reduction', 'content': 'These forms of magnesium have anti-inflammatory properties, which help to reduce muscle soreness and joint pain post-exercise.'},
         {'label': 'Detoxification', 'content': 'Magnesium sulfate (Epsom salt) assists in flushing out toxins from the body, promoting a sense of relaxation and recovery.'},
