@@ -1,4 +1,4 @@
-package com.magnesiumathletes.magnesium_athletes
+package com.magnesiumathletes.android
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -400,57 +400,60 @@ class _ProductDetailPopupState extends State<ProductDetailPopup> {
             ),
 
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        height: 300,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9).withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Hero(
-                          tag: 'prod-${widget.product['id']}',
-                          child: imageUrl != null
-                              ? Image.network(imageUrl, fit: BoxFit.contain)
-                              : const Icon(Icons.bolt, color: Color(0xFF02B3A9), size: 80),
+              child: ColoredBox(
+                color: Colors.white,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          height: 300,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Hero(
+                            tag: 'prod-${widget.product['id']}',
+                            child: imageUrl != null
+                                ? Image.network(imageUrl, fit: BoxFit.contain)
+                                : const Icon(Icons.bolt, color: Color(0xFF02B3A9), size: 80),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                    Text(
-                      widget.product['title'],
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24, height: 1.1, color: Color(0xFF0F172A)),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '\$$formattedPrice',
-                      style: const TextStyle(
-                        color: Color(0xFF02B3A9),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 22,
-                        fontStyle: FontStyle.italic,
+                      Text(
+                        widget.product['title'],
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24, height: 1.1, color: Color(0xFF0F172A)),
                       ),
-                    ),
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 8),
+                      Text(
+                        '\$$formattedPrice',
+                        style: const TextStyle(
+                          color: Color(0xFF02B3A9),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 22,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
 
-                    const Text(
-                      'RECOVERY INTEL',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.5, color: Color(0xFF64748B)),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      description,
-                      style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 15, height: 1.6),
-                    ),
-                  ],
+                      const Text(
+                        'RECOVERY INTEL',
+                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.5, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        description,
+                        style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 15, height: 1.6),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -458,7 +461,7 @@ class _ProductDetailPopupState extends State<ProductDetailPopup> {
             Container(
               padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: Colors.white,
                 border: Border(top: BorderSide(color: const Color(0xFFE2E8F0))),
               ),
               child: Column(

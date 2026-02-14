@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -81,6 +80,7 @@ class LandingScreen extends StatefulWidget {
 
 class _LandingScreenState extends State<LandingScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool _hasScrolled = false;
 
   @override
   void initState() {
@@ -90,6 +90,17 @@ class _LandingScreenState extends State<LandingScreen> {
         context.read<ShopifyProvider>().fetchStoreData();
       }
     });
+    _scrollController.addListener(() {
+      if (!_hasScrolled && _scrollController.offset > 10) {
+        setState(() => _hasScrolled = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _showMissionPopup(BuildContext context) {
@@ -102,66 +113,105 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   void _showIngredientDetail(BuildContext context, String title, List<Map<String, String>> points, Color color, IconData icon) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.75,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 16),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2)),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+              ),
+              BoxShadow(
+                color: color.withValues(alpha: 0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 24, 16, 20),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.06),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  border: Border(bottom: BorderSide(color: color.withValues(alpha: 0.12))),
+                ),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
-                          child: Icon(icon, color: color, size: 28),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(title,
-                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Color(0xFF0F172A))
-                          ),
-                        ),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(icon, color: color, size: 24),
                     ),
-                    const SizedBox(height: 32),
-                    ...points.map((p) => Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(title,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          fontStyle: FontStyle.italic,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.close, size: 16, color: Color(0xFF64748B)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: points.map((p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(p['label']!.toUpperCase(),
-                              style: TextStyle(color: color, fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 12)
+                            style: TextStyle(color: color, fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 11),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(p['content']!,
-                              style: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF475569))
+                            style: const TextStyle(fontSize: 15, height: 1.6, color: Color(0xFF475569)),
                           ),
                         ],
                       ),
-                    )),
-                  ],
+                    )).toList(),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -255,8 +305,8 @@ class _LandingScreenState extends State<LandingScreen> {
             padding: const EdgeInsets.all(40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                const Spacer(),
                 const Text(
                   'ELITE',
                   style: TextStyle(
@@ -329,7 +379,9 @@ class _LandingScreenState extends State<LandingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
+                Center(child: _ScrollIndicator(hasScrolled: _hasScrolled)),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -339,6 +391,46 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildMolecularBreakdown() {
+    final ingredients = [
+      _Ingredient('MAGNESIUM SALTS', 'Deep-Absorbing Recovery', 'Mg', '01', const Color(0xFF02B3A9), [
+        {'label': 'Muscle Relaxation', 'content': 'Magnesium is a natural muscle relaxant. When absorbed through the skin, it helps to ease muscle tension and reduce cramps.'},
+        {'label': 'Inflammation Reduction', 'content': 'These forms of magnesium have anti-inflammatory properties, which help to reduce muscle soreness and joint pain post-exercise.'},
+        {'label': 'Detoxification', 'content': 'Magnesium sulfate (Epsom salt) assists in flushing out toxins from the body, promoting a sense of relaxation and recovery.'},
+      ]),
+      _Ingredient('MSM', 'Joint Performance', 'Ms', '02', const Color(0xFFF19842), [
+        {'label': 'Joint Health', 'content': 'MSM is believed to help reduce joint pain and inflammation, making it popular among people with arthritis or joint-related issues.'},
+        {'label': 'Muscle Recovery', 'content': 'It can aid in reducing muscle soreness and speeding up recovery after exercise, which is beneficial for athletes.'},
+        {'label': 'Anti-Inflammatory', 'content': 'MSM has anti-inflammatory properties, which can help alleviate conditions caused by chronic inflammation.'},
+        {'label': 'Skin Health', 'content': 'MSM supports healthy skin by reducing inflammation and contributing to collagen production, improving skin elasticity and reducing signs of aging.'},
+        {'label': 'Detoxification', 'content': 'It may help the body detox by supporting the liver and enhancing the elimination of toxins. MSM provides sulfur, essential for collagen, keratin, and connective tissue structure.'},
+      ]),
+      _Ingredient('MENTHOL', 'Cooling Therapy', 'Me', '03', const Color(0xFF02B3A9), [
+        {'label': 'Cooling Sensation', 'content': 'Camphor and menthol provide a cooling effect that helps soothe aching muscles and joints.'},
+        {'label': 'Antiseptic Properties', 'content': 'They help prevent infections by keeping the skin clean and bacteria-free.'},
+      ]),
+      _Ingredient('ARNICA', 'Healing Botanical', 'Ar', '04', const Color(0xFFF19842), [
+        {'label': 'Healing Properties', 'content': 'Arnica is known for its ability to speed up the healing process of bruises and muscle strains.'},
+        {'label': 'Pain Relief', 'content': 'It helps reduce pain and inflammation, making it ideal for post-workout recovery.'},
+      ]),
+      _Ingredient('DEAD SEA SALT', 'Mineral Charge', 'Ds', '05', const Color(0xFF02B3A9), [
+        {'label': 'Mineral-Rich', 'content': 'Dead Sea salt is packed with minerals that are beneficial for the skin and overall health.'},
+        {'label': 'Skin Health', 'content': 'It helps in improving skin hydration and reducing inflammation, promoting healthier skin.'},
+      ]),
+      _Ingredient('RECOVERY OILS', 'Skin & Tea Tree', 'Ro', '06', const Color(0xFFF19842), [
+        {'label': 'Hydration', 'content': 'Essential skin oils help to moisturize the skin, preventing dryness and maintaining skin elasticity.'},
+        {'label': 'Nourishment', 'content': 'They provide essential nutrients that keep the skin healthy and glowing.'},
+        {'label': 'Anti-fungal & Antibacterial', 'content': 'Tea tree oil helps prevent fungal and bacterial infections, keeping the skin clean and healthy.'},
+        {'label': 'Acne Prevention', 'content': 'Its antiseptic properties help in preventing and treating sweat acne and other skin irritations caused by gym environments.'},
+      ]),
+    ];
+
+    // Staggered rows: [1], [2,3], [4,5,6]
+    final rows = [
+      [ingredients[0]],
+      [ingredients[1], ingredients[2]],
+      [ingredients[3], ingredients[4], ingredients[5]],
+    ];
+
     return Container(
       width: double.infinity,
       color: const Color(0xFF0F172A),
@@ -357,66 +449,25 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Text('HOW OUR ACTIVE RECOVERY FORMULA WORKS',
                   style: TextStyle(color: Color(0xFF02B3A9), fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.5)),
             ),
-            const SizedBox(height: 32),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              // Wide enough for text, tall enough for comfort
-              childAspectRatio: 0.92,
+            const SizedBox(height: 40),
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: [
-                _buildIngredientCard(
-                    context,
-                    'MAGNESIUM SALTS',
-                    'Deep-Absorbing Recovery',
-                    Icons.bolt,
-                    const Color(0xFF02B3A9),
-                    []
-                ),
-                _buildIngredientCard(
-                    context,
-                    'MSM',
-                    'Joint Performance',
-                    Icons.verified_user_outlined,
-                    const Color(0xFFF19842),
-                    []
-                ),
-                _buildIngredientCard(
-                    context,
-                    'MENTHOL',
-                    'Cooling Therapy',
-                    Icons.ac_unit,
-                    const Color(0xFF02B3A9),
-                    []
-                ),
-                _buildIngredientCard(
-                    context,
-                    'ARNICA',
-                    'Healing Botanical',
-                    Icons.health_and_safety_outlined,
-                    const Color(0xFFF19842),
-                    []
-                ),
-                _buildIngredientCard(
-                    context,
-                    'DEAD SEA SALT',
-                    'Mineral Charge',
-                    Icons.water_drop_outlined,
-                    const Color(0xFF02B3A9),
-                    []
-                ),
-                _buildIngredientCard(
-                    context,
-                    'RECOVERY OILS',
-                    'Skin & Tea Tree',
-                    Icons.opacity,
-                    const Color(0xFFF19842),
-                    []
-                ),
-              ],
+              child: Column(
+                children: rows.map((row) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: row.map((ing) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: SizedBox(
+                        width: 110,
+                        height: 130,
+                        child: _buildPeriodicTile(context, ing),
+                      ),
+                    )).toList(),
+                  ),
+                )).toList(),
+              ),
             ),
           ],
         ),
@@ -424,79 +475,79 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildIngredientCard(BuildContext context, String title, String subtitle, IconData icon, Color color, List<Map<String, String>> points) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(height: 12),
-          Text(title,
-            style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 21, // BOLD & LARGE
-                fontStyle: FontStyle.italic,
-                color: Colors.white,
-                height: 1.0,
-                letterSpacing: -0.8,
-                shadows: [Shadow(color: Colors.black, blurRadius: 4)]
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Text(subtitle,
-            style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: 14, // INCREASED CONTRAST & SIZE
-                fontWeight: FontWeight.bold,
-                height: 1.1
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: color.withValues(alpha: 0.3)),
+  Widget _buildPeriodicTile(BuildContext context, _Ingredient ing) {
+    return GestureDetector(
+      onTap: () => _showIngredientDetail(context, ing.title, ing.points, ing.color, Icons.science),
+      child: Container(
+        decoration: BoxDecoration(
+          color: ing.color.withValues(alpha: 0.28),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: ing.color.withValues(alpha: 0.7), width: 1.5),
+        ),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Atomic number top-left
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                ing.atomicNumber,
+                style: TextStyle(
+                  color: ing.color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('INTEL',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                          fontStyle: FontStyle.italic
-                      )
+            ),
+            // Symbol — large, centered
+            Expanded(
+              child: Center(
+                child: Text(
+                  ing.symbol,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 40,
+                    fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: -1,
+                    shadows: [Shadow(color: ing.color.withValues(alpha: 0.9), blurRadius: 14)],
                   ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.bolt_sharp, color: Colors.white, size: 12),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+            // Full name
+            Text(
+              ing.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 9,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.2,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            // Subtitle
+            Text(
+              ing.subtitle,
+              style: TextStyle(
+                color: ing.color,
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildAboutSection() {
     return Padding(
@@ -564,12 +615,18 @@ class _LandingScreenState extends State<LandingScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: const Color(0xFF02B3A9).withValues(alpha: 0.25), width: 1.5),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      )
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF02B3A9).withValues(alpha: 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -577,22 +634,27 @@ class _LandingScreenState extends State<LandingScreen> {
                     children: [
                       Positioned.fill(
                         child: imageUrl != null
-                            ? Image.network(imageUrl, fit: BoxFit.cover, color: Colors.black.withValues(alpha: 0.1), colorBlendMode: BlendMode.darken)
+                            ? Image.network(imageUrl, fit: BoxFit.cover, color: Colors.black.withValues(alpha: 0.15), colorBlendMode: BlendMode.darken)
                             : Container(color: const Color(0xFFF1F5F9)),
+                      ),
+                      Positioned.fill(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Color(0xFF0F172A)],
+                              stops: [0.35, 1.0],
+                            ),
+                          ),
+                        ),
                       ),
                       Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
-                            ),
-                          ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -603,24 +665,31 @@ class _LandingScreenState extends State<LandingScreen> {
                                   fontWeight: FontWeight.w900,
                                   fontSize: 18,
                                   fontStyle: FontStyle.italic,
-                                  letterSpacing: 1,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Text(
-                                    'VIEW COLLECTION',
-                                    style: TextStyle(
-                                      color: Color(0xFF02B3A9),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 10,
-                                      letterSpacing: 1.5,
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF02B3A9),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('VIEW',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 10,
+                                        letterSpacing: 1.5,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.arrow_forward, color: Color(0xFF02B3A9), size: 10),
-                                ],
+                                    SizedBox(width: 4),
+                                    Icon(Icons.arrow_forward, color: Colors.white, size: 10),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -638,39 +707,87 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildMissionTrigger(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showMissionPopup(context),
-      child: Container(
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: const Color(0xFF02B3A9).withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: const Color(0xFF02B3A9).withValues(alpha: 0.2)),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0F172A), Color(0xFFF8FAFC)],
+          stops: [0.0, 0.55],
         ),
-        child: Column(
-          children: [
-            const Text('OUR MISSION',
-                style: TextStyle(color: Color(0xFF02B3A9), fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 16)),
-            const SizedBox(height: 12),
-            Text(
-              'Enhancing performance and recovery through science.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.8), fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF02B3A9),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(color: const Color(0xFF02B3A9).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))
+      ),
+      padding: const EdgeInsets.fromLTRB(30, 40, 30, 40),
+      child: GestureDetector(
+        onTap: () => _showMissionPopup(context),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF02B3A9).withValues(alpha: 0.12),
+                blurRadius: 40,
+                offset: const Offset(0, 16),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 28, height: 2,
+                    color: const Color(0xFF02B3A9),
+                    margin: const EdgeInsets.only(right: 10),
+                  ),
+                  const Text('OUR MISSION',
+                      style: TextStyle(color: Color(0xFF02B3A9), fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 11)),
+                  Container(
+                    width: 28, height: 2,
+                    color: const Color(0xFF02B3A9),
+                    margin: const EdgeInsets.only(left: 10),
+                  ),
                 ],
               ),
-              child: const Text('READ MISSION', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-            ),
-          ],
+              const SizedBox(height: 16),
+              const Text(
+                'Enhancing performance and recovery through science.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF0F172A), fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, height: 1.2),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF02B3A9), Color(0xFF01927A)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(color: const Color(0xFF02B3A9).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('READ MISSION', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward_ios, color: Colors.white, size: 11),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -680,13 +797,17 @@ class _LandingScreenState extends State<LandingScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
       decoration: const BoxDecoration(
-        color: Color(0xFFF19842),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF19842), Color(0xFFB85E1A)],
+        ),
       ),
       child: Column(
         children: [
           const Text('READY TO OPTIMIZE?',
               style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, fontStyle: FontStyle.italic, color: Colors.white)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             height: 70,
@@ -694,9 +815,10 @@ class _LandingScreenState extends State<LandingScreen> {
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StorefrontScreen())),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFFF19842),
+                foregroundColor: const Color(0xFFB85E1A),
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shadowColor: Colors.black.withValues(alpha: 0.2),
               ),
               child: const Text('SHOP THE COLLECTION', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5)),
             ),
@@ -781,4 +903,71 @@ class MissionPopup extends StatelessWidget {
       ],
     );
   }
+}
+
+// ── Animated scroll indicator ─────────────────────────────────────────────────
+
+// ── Scroll indicator (fading chevron) ────────────────────────────────────────
+
+class _ScrollIndicator extends StatefulWidget {
+  final bool hasScrolled;
+  const _ScrollIndicator({required this.hasScrolled});
+
+  @override
+  State<_ScrollIndicator> createState() => _ScrollIndicatorState();
+}
+
+class _ScrollIndicatorState extends State<_ScrollIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+    _bounceAnimation = Tween<double>(begin: 0, end: 6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: widget.hasScrolled ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 400),
+      child: AnimatedBuilder(
+        animation: _bounceAnimation,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(0, _bounceAnimation.value),
+          child: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.white.withValues(alpha: 0.35),
+            size: 42,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Ingredient data class ─────────────────────────────────────────────────────
+
+class _Ingredient {
+  final String title;
+  final String subtitle;
+  final String symbol;
+  final String atomicNumber;
+  final Color color;
+  final List<Map<String, String>> points;
+  const _Ingredient(this.title, this.subtitle, this.symbol, this.atomicNumber, this.color, this.points);
 }
