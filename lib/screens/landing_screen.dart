@@ -1,14 +1,35 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/shopify_provider.dart';
 import '../components/molecular_background.dart';
 import 'storefront_screen.dart';
 import 'cart_screen.dart';
+import 'dart:math' as math;
 
 /// BRAND ASSETS
 const String brandLogoUrl = 'https://firebasestorage.googleapis.com/v0/b/magnesium-athletes.firebasestorage.app/o/logo.svg?alt=media&token=53463da7-1650-4339-a2c1-f8634053928f';
 const String heroImageUrl = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=2070';
+
+class InstagramIcon extends StatelessWidget {
+  final double size;
+  final Color color;
+  const InstagramIcon({super.key, this.size = 24, this.color = Colors.black});
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.string(
+      '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="currentColor"/>
+      </svg>''',
+      height: size,
+      width: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+  }
+}
 
 class BrandLogo extends StatefulWidget {
   final double height;
@@ -45,7 +66,7 @@ class _BrandLogoState extends State<BrandLogo> with SingleTickerProviderStateMix
         brandLogoUrl,
         height: widget.height,
         fit: BoxFit.contain,
-        semanticsLabel: '', // Prevents fallback text rendering
+        semanticsLabel: '',
         placeholderBuilder: (context) => _buildPulsePlaceholder(),
         errorBuilder: (context, error, stackTrace) => _buildPulsePlaceholder(),
       ),
@@ -103,6 +124,17 @@ class _LandingScreenState extends State<LandingScreen> {
     super.dispose();
   }
 
+  Future<void> _launchInstagram() async {
+    final Uri url = Uri.parse('https://www.instagram.com/magnesiumathletes');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch Instagram')),
+        );
+      }
+    }
+  }
+
   void _showMissionPopup(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -142,7 +174,6 @@ class _LandingScreenState extends State<LandingScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
               Container(
                 padding: const EdgeInsets.fromLTRB(24, 24, 16, 20),
                 decoration: BoxDecoration(
@@ -186,7 +217,6 @@ class _LandingScreenState extends State<LandingScreen> {
                   ],
                 ),
               ),
-              // Content
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
@@ -239,6 +269,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   _buildCollectionNavigator(shopify.collections),
                 _buildAboutSection(),
                 _buildFooterCTA(),
+                _buildSocialSection(), // Moved to the very bottom
               ],
             ),
           ),
@@ -256,7 +287,23 @@ class _LandingScreenState extends State<LandingScreen> {
       toolbarHeight: 100,
       centerTitle: false,
       titleSpacing: 24,
-      title: const BrandLogo(height: 60),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 180),
+            child: const BrandLogo(height: 60),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const InstagramIcon(color: Color(0xFF02B3A9), size: 24),
+            onPressed: _launchInstagram,
+            tooltip: 'Follow us on Instagram',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 12),
@@ -272,7 +319,7 @@ class _LandingScreenState extends State<LandingScreen> {
   Widget _buildHero() {
     return Container(
       width: double.infinity,
-      height: 600,
+      height: 560,
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
         color: Color(0xFF0F172A),
@@ -302,7 +349,7 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(40),
+            padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -333,7 +380,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 Text(
                   'High-absorption magnesium salts and skin-essential vitamins engineered to target stiffness, relax muscles, and accelerate athletic recovery.',
                   style: TextStyle(
@@ -343,11 +390,11 @@ class _LandingScreenState extends State<LandingScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
                 GestureDetector(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StorefrontScreen())),
                   child: Container(
-                    height: 72,
+                    height: 64,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
@@ -379,9 +426,8 @@ class _LandingScreenState extends State<LandingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 Center(child: _ScrollIndicator(hasScrolled: _hasScrolled)),
-                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -397,12 +443,12 @@ class _LandingScreenState extends State<LandingScreen> {
         {'label': 'Inflammation Reduction', 'content': 'These forms of magnesium have anti-inflammatory properties, which help to reduce muscle soreness and joint pain post-exercise.'},
         {'label': 'Detoxification', 'content': 'Magnesium sulfate (Epsom salt) assists in flushing out toxins from the body, promoting a sense of relaxation and recovery.'},
       ]),
-      _Ingredient('MSM', 'Joint Performance', 'Ms', '02', const Color(0xFFF19842), [
-        {'label': 'Joint Health', 'content': 'MSM is believed to help reduce joint pain and inflammation, making it popular among people with arthritis or joint-related issues.'},
-        {'label': 'Muscle Recovery', 'content': 'It can aid in reducing muscle soreness and speeding up recovery after exercise, which is beneficial for athletes.'},
-        {'label': 'Anti-Inflammatory', 'content': 'MSM has anti-inflammatory properties, which can help alleviate conditions caused by chronic inflammation.'},
-        {'label': 'Skin Health', 'content': 'MSM supports healthy skin by reducing inflammation and contributing to collagen production, improving skin elasticity and reducing signs of aging.'},
-        {'label': 'Detoxification', 'content': 'It may help the body detox by supporting the liver and enhancing the elimination of toxins. MSM provides sulfur, essential for collagen, keratin, and connective tissue structure.'},
+      _Ingredient('MSM', 'Methylsulfonylmethane', 'Ms', '02', const Color(0xFFF19842), [
+        {'label': 'Methylsulfonylmethane', 'content': 'Methylsulfonylmethane (MSM) is a naturally occurring sulfur compound known for its exceptional anti-inflammatory properties.'},
+        {'label': 'Joint Health', 'content': 'MSM is believed to help reduce joint pain and inflammation, making it popular among people with arthritis.'},
+        {'label': 'Muscle Recovery', 'content': 'It can aid in reducing muscle soreness and speeding up recovery after exercise.'},
+        {'label': 'Skin Health', 'content': 'MSM supports healthy skin by reducing inflammation and contributing to collagen production.'},
+        {'label': 'Detoxification', 'content': 'It may help the body detox by supporting the liver and enhancing the elimination of toxins.'},
       ]),
       _Ingredient('MENTHOL', 'Cooling Therapy', 'Me', '03', const Color(0xFF02B3A9), [
         {'label': 'Cooling Sensation', 'content': 'Camphor and menthol provide a cooling effect that helps soothe aching muscles and joints.'},
@@ -420,21 +466,19 @@ class _LandingScreenState extends State<LandingScreen> {
         {'label': 'Hydration', 'content': 'Essential skin oils help to moisturize the skin, preventing dryness and maintaining skin elasticity.'},
         {'label': 'Nourishment', 'content': 'They provide essential nutrients that keep the skin healthy and glowing.'},
         {'label': 'Anti-fungal & Antibacterial', 'content': 'Tea tree oil helps prevent fungal and bacterial infections, keeping the skin clean and healthy.'},
-        {'label': 'Acne Prevention', 'content': 'Its antiseptic properties help in preventing and treating sweat acne and other skin irritations caused by gym environments.'},
+        {'label': 'Acne Prevention', 'content': 'Its antiseptic properties help in preventing and treating sweat acne and other skin irritations.'},
       ]),
     ];
 
-    // Staggered rows: [1], [2,3], [4,5,6]
     final rows = [
-      [ingredients[0]],
-      [ingredients[1], ingredients[2]],
+      [ingredients[0], ingredients[1], ingredients[2]],
       [ingredients[3], ingredients[4], ingredients[5]],
     ];
 
     return Container(
       width: double.infinity,
       color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(vertical: 80),
+      padding: const EdgeInsets.only(top: 40, bottom: 80),
       child: MolecularBackground(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,18 +495,18 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
             const SizedBox(height: 40),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Column(
                 children: rows.map((row) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: row.map((ing) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: SizedBox(
-                        width: 110,
-                        height: 130,
-                        child: _buildPeriodicTile(context, ing),
+                        width: 105,
+                        height: 125,
+                        child: _AnimatedPeriodicTile(ing: ing, onTap: () => _showIngredientDetail(context, ing.title, ing.points, ing.color, Icons.science)),
                       ),
                     )).toList(),
                   ),
@@ -475,83 +519,9 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildPeriodicTile(BuildContext context, _Ingredient ing) {
-    return GestureDetector(
-      onTap: () => _showIngredientDetail(context, ing.title, ing.points, ing.color, Icons.science),
-      child: Container(
-        decoration: BoxDecoration(
-          color: ing.color.withValues(alpha: 0.28),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: ing.color.withValues(alpha: 0.7), width: 1.5),
-        ),
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Atomic number top-left
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                ing.atomicNumber,
-                style: TextStyle(
-                  color: ing.color,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            // Symbol — large, centered
-            Expanded(
-              child: Center(
-                child: Text(
-                  ing.symbol,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                    fontStyle: FontStyle.italic,
-                    letterSpacing: -1,
-                    shadows: [Shadow(color: ing.color.withValues(alpha: 0.9), blurRadius: 14)],
-                  ),
-                ),
-              ),
-            ),
-            // Full name
-            Text(
-              ing.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.2,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 2),
-            // Subtitle
-            Text(
-              ing.subtitle,
-              style: TextStyle(
-                color: ing.color,
-                fontSize: 8,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
   Widget _buildAboutSection() {
     return Padding(
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.fromLTRB(30, 30, 30, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -568,8 +538,45 @@ class _LandingScreenState extends State<LandingScreen> {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, color: Color(0xFF0F172A))),
           const SizedBox(height: 16),
           Text(
-            'Born from the shared passion of a dedicated Cross-Fit/Boxing enthusiast and a natural skin care expert, Magnesium Athletes was created to revolutionize recovery. We set out to banish gritty skin, alleviate muscle aches, and quell inflammation—all while keeping athletes remarkably clean and fresh.',
+            'Born from the shared passion of a dedicated Cross-Fit/Boxing enthusiast and a natural skin care expert, Magnesium Athletes was created to revolutionize recovery.',
             style: TextStyle(color: const Color(0xFF0F172A).withValues(alpha: 0.7), fontSize: 16, height: 1.6, fontWeight: FontWeight.w400),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialSection() {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF0F172A),
+      padding: const EdgeInsets.fromLTRB(30, 60, 30, 80),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text('FOLLOW OUR JOURNEY',
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 3, color: Color(0xFF02B3A9))),
+          const SizedBox(height: 24),
+          GestureDetector(
+            onTap: _launchInstagram,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InstagramIcon(color: Color(0xFFF19842), size: 24),
+                  SizedBox(width: 16),
+                  Text(
+                    '@MAGNESIUMATHLETES',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -621,11 +628,6 @@ class _LandingScreenState extends State<LandingScreen> {
                         color: Colors.black.withValues(alpha: 0.12),
                         blurRadius: 24,
                         offset: const Offset(0, 10),
-                      ),
-                      BoxShadow(
-                        color: const Color(0xFF02B3A9).withValues(alpha: 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -730,11 +732,6 @@ class _LandingScreenState extends State<LandingScreen> {
                 blurRadius: 40,
                 offset: const Offset(0, 16),
               ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
             ],
           ),
           child: Column(
@@ -823,7 +820,6 @@ class _LandingScreenState extends State<LandingScreen> {
               child: const Text('SHOP THE COLLECTION', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5)),
             ),
           ),
-          const SizedBox(height: 40),
         ],
       ),
     );
@@ -860,26 +856,8 @@ class MissionPopup extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28, fontStyle: FontStyle.italic, color: Color(0xFF0F172A), letterSpacing: -0.5)),
                   const SizedBox(height: 20),
                   const Text(
-                    'At Magnesium Athletes, our mission is to enhance your performance and recovery through the power of our Active Recovery Soak formula and extended products. We believe that all athletes deserve the best possible care for their bodies. Our premium-quality products are designed to optimize and enhance your Performance, Recovery and Well-being.',
+                    'At Magnesium Athletes, our mission is to enhance your performance and recovery through the power of science.',
                     style: TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF475569)),
-                  ),
-                  const SizedBox(height: 32),
-                  const Text('OUR MISSION IS THREEFOLD:',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1.5, color: Color(0xFF02B3A9))),
-                  const SizedBox(height: 24),
-                  _buildMissionPoint(
-                    'PERFORMANCE ENHANCEMENT',
-                    'We strive to help athletes reach their peak performance by providing special formulated magnesium bath salts that promote muscle relaxation, reduce fatigue, and improve overall endurance. Our scientifically formulated products are specifically tailored to support your athletic endeavors, enabling you to push your limits and achieve your goals.',
-                  ),
-                  const SizedBox(height: 24),
-                  _buildMissionPoint(
-                    'RAPID RECOVERY',
-                    'We understand the importance of recovery in maximizing athletic potential. Our magnesium bath salts are meticulously crafted to facilitate post-workout rejuvenation and muscle repair. By soaking in our revitalizing Active Recovery Bath Soaks, you can accelerate recovery time, reduce inflammation, and minimize the risk of injuries, allowing you to get back in the game stronger and faster.',
-                  ),
-                  const SizedBox(height: 24),
-                  _buildMissionPoint(
-                    'WELL-BEING',
-                    'We are committed to promoting holistic skincare and body routine for our athletes. Our mission extends beyond performance and recovery to encompass your overall physical and mental wellness. Feel the power of our magnesium products created to alleviate pain, heal sore muscles, relax your mind, and clean your body and skin from bacteria, viruses, and fungi that can be absorbed during and from your training environments. Our goal is for you to excel in your sport while prioritizing your overall well-being. We are proud and honored to be your trusted partner in your athletic journey, providing you with the highest quality magnesium products that empower you to excel and unleash your potential. After all, a balanced athlete is a successful athlete!',
                   ),
                   const SizedBox(height: 40),
                   const Text('-Magnesium Athletes.',
@@ -892,22 +870,126 @@ class MissionPopup extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildMissionPoint(String title, String content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, fontStyle: FontStyle.italic, color: Color(0xFF0F172A))),
-        const SizedBox(height: 10),
-        Text(content, style: const TextStyle(fontSize: 15, height: 1.6, color: Color(0xFF475569))),
-      ],
+class _AnimatedPeriodicTile extends StatefulWidget {
+  final _Ingredient ing;
+  final VoidCallback onTap;
+  const _AnimatedPeriodicTile({required this.ing, required this.onTap});
+
+  @override
+  State<_AnimatedPeriodicTile> createState() => _AnimatedPeriodicTileState();
+}
+
+class _AnimatedPeriodicTileState extends State<_AnimatedPeriodicTile> with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _shimmerController,
+        builder: (context, child) {
+          final shimmerValue = (math.sin(_shimmerController.value * 2 * math.pi) + 1) / 2;
+          return Container(
+            decoration: BoxDecoration(
+              color: widget.ing.color.withValues(alpha: 0.18 + (shimmerValue * 0.1)),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: widget.ing.color.withValues(alpha: 0.5 + (shimmerValue * 0.4)),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.ing.color.withValues(alpha: 0.1 * shimmerValue),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                )
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    widget.ing.atomicNumber,
+                    style: TextStyle(
+                      color: widget.ing.color,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      widget.ing.symbol,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -1,
+                        shadows: [
+                          Shadow(
+                            color: widget.ing.color.withValues(alpha: 0.6 + (shimmerValue * 0.3)),
+                            blurRadius: 14,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Text(
+                  widget.ing.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  widget.ing.subtitle,
+                  style: TextStyle(
+                    color: widget.ing.color.withValues(alpha: 0.7 + (shimmerValue * 0.3)),
+                    fontSize: 7,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
-
-// ── Animated scroll indicator ─────────────────────────────────────────────────
-
-// ── Scroll indicator (fading chevron) ────────────────────────────────────────
 
 class _ScrollIndicator extends StatefulWidget {
   final bool hasScrolled;
@@ -917,8 +999,7 @@ class _ScrollIndicator extends StatefulWidget {
   State<_ScrollIndicator> createState() => _ScrollIndicatorState();
 }
 
-class _ScrollIndicatorState extends State<_ScrollIndicator>
-    with SingleTickerProviderStateMixin {
+class _ScrollIndicatorState extends State<_ScrollIndicator> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _bounceAnimation;
 
@@ -960,8 +1041,6 @@ class _ScrollIndicatorState extends State<_ScrollIndicator>
   }
 }
 
-// ── Ingredient data class ─────────────────────────────────────────────────────
-
 class _Ingredient {
   final String title;
   final String subtitle;
@@ -971,3 +1050,4 @@ class _Ingredient {
   final List<Map<String, String>> points;
   const _Ingredient(this.title, this.subtitle, this.symbol, this.atomicNumber, this.color, this.points);
 }
+
